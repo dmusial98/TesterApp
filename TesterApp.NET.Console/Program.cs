@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -7,12 +8,13 @@ using System.Xml.Serialization;
 using CsvHelper;
 using CsvHelper.Configuration;
 using TesterApp.NET.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace TesterApp.NET.Console
 {
     class Program
     {
-        private static TesterContext _context = TesterContext.Instance;
+        private static TesterContext _context = new TesterContext(new DbContextOptions<TesterContext>() );
 
         static void Main(string[] args)
         {
@@ -28,6 +30,9 @@ namespace TesterApp.NET.Console
 
             //var testerDeviceCSV = ReadDataFromCSV<TesterDevice>(@"..\\..\\..\\..\\csv\\tester_device.csv");
             //AddTesterDevices(testerDeviceCSV);
+
+            var testers = GetTesters();
+            var CountryCodes = testers.GroupBy(t => t.CountryCode).ToList();
 
             System.Console.WriteLine("Press any key...");
             System.Console.ReadKey();
@@ -70,6 +75,11 @@ namespace TesterApp.NET.Console
                 }));
                 _context.SaveChanges();
             }
+        }
+
+        private static List<Tester> GetTesters()
+        {
+            return _context.Testers.ToList();
         }
 
         private static void AddBugs(List<Bug> bugs)
